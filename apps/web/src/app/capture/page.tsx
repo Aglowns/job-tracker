@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-export default function CapturePage() {
+function CaptureForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -191,6 +191,14 @@ export default function CapturePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function CapturePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CaptureForm />
+    </Suspense>
   );
 }
 

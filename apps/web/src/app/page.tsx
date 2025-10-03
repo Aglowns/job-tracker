@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { ApplicationList } from '@/components/ApplicationList';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 async function getApplications() {
