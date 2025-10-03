@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker - Parser Demo (No Setup Required!)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .info-box {
+            background: rgba(255,255,255,0.95);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .sample-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .vendor-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .badge-greenhouse { background: #10b981; color: white; }
+        .badge-lever { background: #3b82f6; color: white; }
+        .badge-workday { background: #f59e0b; color: white; }
+        .badge-generic { background: #6b7280; color: white; }
+        .email-header {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        .email-content {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.85em;
+            max-height: 150px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+        .parsed-result {
+            background: #ecfdf5;
+            border: 2px solid #10b981;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        .result-item {
+            margin: 5px 0;
+            display: flex;
+            gap: 10px;
+        }
+        .result-label {
+            font-weight: 600;
+            min-width: 100px;
+            color: #059669;
+        }
+        .confidence-bar {
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+        .emoji { font-size: 1.5em; margin-right: 10px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #5568d3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Job Tracker Parser Demo</h1>
+        <p class="subtitle">✨ NO DATABASE REQUIRED! See how email parsing works instantly ✨</p>
+
+        <div class="info-box">
+            <h2>🚀 What This Demo Shows</h2>
+            <p style="margin: 10px 0;">This page demonstrates the core email parsing functionality that powers the Job Tracker's auto-capture feature. Below are real sample emails and what the parsers extract from them.</p>
+            
+            <div class="features-grid">
+                <div class="feature-box">
+                    <span class="emoji">🏢</span>
+                    <strong>Greenhouse Parser</strong>
+                    <p style="margin-top: 5px; font-size: 0.9em;">High-confidence parsing from Greenhouse ATS emails</p>
+                </div>
+                <div class="feature-box">
+                    <span class="emoji">📊</span>
+                    <strong>Lever Parser</strong>
+                    <p style="margin-top: 5px; font-size: 0.9em;">Extracts "applied to X at Y" patterns</p>
+                </div>
+                <div class="feature-box">
+                    <span class="emoji">💼</span>
+                    <strong>Workday Parser</strong>
+                    <p style="margin-top: 5px; font-size: 0.9em;">Handles Workday submission confirmations</p>
+                </div>
+                <div class="feature-box">
+                    <span class="emoji">🔍</span>
+                    <strong>Fallback Parser</strong>
+                    <p style="margin-top: 5px; font-size: 0.9em;">Generic heuristics for unknown systems</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample 1: Greenhouse -->
+        <div class="sample-card">
+            <span class="vendor-badge badge-greenhouse">GREENHOUSE</span>
+            <div class="email-header">
+                <strong>From:</strong> jobs@greenhouse.io<br>
+                <strong>Subject:</strong> Application Received - Senior Software Engineer
+            </div>
+            <div class="email-content">Thank you for your interest in joining our team!
+
+We have received your application for the following position:
+
+Position: Senior Software Engineer
+Company: TechCorp Inc
+Location: San Francisco, CA
+
+You can view your application status here:
+https://boards.greenhouse.io/techcorp/jobs/1234567
+
+We'll review your application and get back to you soon.</div>
+            <div class="parsed-result">
+                <strong>✅ Parsed Results:</strong>
+                <div class="result-item">
+                    <span class="result-label">Title:</span>
+                    <span>Senior Software Engineer</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Company:</span>
+                    <span>TechCorp Inc</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Location:</span>
+                    <span>San Francisco, CA</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Job URL:</span>
+                    <span>https://boards.greenhouse.io/techcorp/jobs/1234567</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Confidence:</span>
+                    <span>90%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 90%;">High Confidence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample 2: Lever -->
+        <div class="sample-card">
+            <span class="vendor-badge badge-lever">LEVER</span>
+            <div class="email-header">
+                <strong>From:</strong> recruiting@hire.lever.co<br>
+                <strong>Subject:</strong> Thanks for applying!
+            </div>
+            <div class="email-content">Hi there!
+
+Thank you for your application. You applied to Frontend Developer at StartupXYZ.
+
+We're excited to review your profile and will be in touch if we'd like to move forward.
+
+You can check your application here:
+https://jobs.lever.co/startupxyz/frontend-dev-2024</div>
+            <div class="parsed-result">
+                <strong>✅ Parsed Results:</strong>
+                <div class="result-item">
+                    <span class="result-label">Title:</span>
+                    <span>Frontend Developer</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Company:</span>
+                    <span>StartupXYZ</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Job URL:</span>
+                    <span>https://jobs.lever.co/startupxyz/frontend-dev-2024</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Confidence:</span>
+                    <span>90%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 90%;">High Confidence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample 3: Workday -->
+        <div class="sample-card">
+            <span class="vendor-badge badge-workday">WORKDAY</span>
+            <div class="email-header">
+                <strong>From:</strong> no-reply@bigtech.com<br>
+                <strong>Subject:</strong> Application Confirmation
+            </div>
+            <div class="email-content">Dear Applicant,
+
+You have successfully submitted your application!
+
+Position: Full Stack Engineer
+Company: BigTech Inc
+Location: New York, NY
+
+You can track your application status at:
+https://bigtech.wd1.myworkdayjobs.com/careers/job/Full-Stack-Engineer_R-12345</div>
+            <div class="parsed-result">
+                <strong>✅ Parsed Results:</strong>
+                <div class="result-item">
+                    <span class="result-label">Title:</span>
+                    <span>Full Stack Engineer</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Company:</span>
+                    <span>BigTech Inc</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Location:</span>
+                    <span>New York, NY</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Job URL:</span>
+                    <span>https://bigtech.wd1.myworkdayjobs.com/careers/job/Full-Stack-Engineer_R-12345</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Confidence:</span>
+                    <span>85%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 85%;">High Confidence</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample 4: Generic -->
+        <div class="sample-card">
+            <span class="vendor-badge badge-generic">GENERIC FALLBACK</span>
+            <div class="email-header">
+                <strong>From:</strong> HR Department &lt;hr@smallcompany.com&gt;<br>
+                <strong>Subject:</strong> Thanks for applying to Backend Engineer at SmallCompany
+            </div>
+            <div class="email-content">Hello,
+
+Thank you for submitting your application. We appreciate your interest in our company.
+
+We'll review your application and contact you if there's a good fit.
+
+Best,
+SmallCompany HR</div>
+            <div class="parsed-result">
+                <strong>✅ Parsed Results:</strong>
+                <div class="result-item">
+                    <span class="result-label">Title:</span>
+                    <span>Backend Engineer</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Company:</span>
+                    <span>SmallCompany</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Confidence:</span>
+                    <span>60%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: 60%;">Medium Confidence</div>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #d97706;">
+                    ⚠️ This would be flagged for manual review (confidence &lt; 60%)
+                </p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h2>🧪 Want to Test the Real Thing?</h2>
+            <p style="margin: 15px 0;">Run the actual parser tests:</p>
+            <code style="background: #1f2937; color: #10b981; padding: 10px; border-radius: 4px; display: block; margin: 10px 0;">
+                pnpm install && cd packages/parsers && pnpm test
+            </code>
+            
+            <h3 style="margin-top: 20px;">📚 Next Steps:</h3>
+            <a href="TEST-WITHOUT-DB.md" class="btn">View Testing Guide</a>
+            <a href="QUICKSTART.md" class="btn">Full Setup Guide</a>
+            <a href="README.md" class="btn">Documentation</a>
+        </div>
+    </div>
+</body>
+</html>
+

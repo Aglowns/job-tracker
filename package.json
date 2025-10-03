@@ -1,0 +1,33 @@
+{
+  "name": "job-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Job Application Tracker with Email Auto-capture and PWA",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter web dev\" \"pnpm --filter api dev\"",
+    "build": "pnpm --filter db build && pnpm --filter shared build && pnpm --filter parsers build && pnpm --filter web build && pnpm --filter api build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:api": "vitest run packages/api",
+    "test:e2e": "playwright test",
+    "db:push": "pnpm --filter db db:push",
+    "db:migrate": "pnpm --filter db db:migrate",
+    "db:studio": "pnpm --filter db db:studio",
+    "seed": "pnpm --filter db seed",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.1",
+    "@types/node": "^20.10.5",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
