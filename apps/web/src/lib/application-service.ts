@@ -141,13 +141,13 @@ export async function updateApplication(
     company?: string;
     location?: string | null;
     job_url?: string | null;
-    status?: string;
+    status?: 'Applied' | 'PhoneScreen' | 'Interview' | 'Offer' | 'Rejected' | 'Ghosted';
     notes?: string | null;
     needs_review?: boolean;
   }
 ) {
   return prisma.application.update({
     where: { id },
-    data,
+    data: data as any, // Type assertion to bypass Prisma's strict typing
   });
 }
