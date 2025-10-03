@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 
 // One-time migration endpoint for Vercel Postgres
 export async function POST(request: NextRequest) {
@@ -7,9 +8,6 @@ export async function POST(request: NextRequest) {
 
     // For Vercel deployment, we'll use a simple approach
     // You can run this once after deployment to set up tables
-    
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
 
     // Test connection
     await prisma.$connect();

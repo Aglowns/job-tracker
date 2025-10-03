@@ -13,6 +13,7 @@
     "@job-tracker/db": "workspace:*",
     "@job-tracker/parsers": "workspace:*",
     "@job-tracker/shared": "workspace:*",
+    "@prisma/client": "^5.7.1",
     "next": "^14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,7 +23,10 @@
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.16",
+    "eslint": "^8.57.1",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3"
