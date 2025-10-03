@@ -5,7 +5,7 @@
   "description": "Job Application Tracker with Email Auto-capture and PWA",
   "scripts": {
     "dev": "concurrently \"pnpm --filter web dev\" \"pnpm --filter api dev\"",
-    "build": "pnpm --filter db build && pnpm --filter shared build && pnpm --filter parsers build && pnpm --filter web build && pnpm --filter api build",
+    "build": "pnpm --filter db db:generate && pnpm --filter db build && pnpm --filter shared build && pnpm --filter parsers build && pnpm --filter web build && pnpm --filter api build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:api": "vitest run packages/api",
