@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 // One-time migration endpoint for Vercel Postgres
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('Starting database migration...');
 
