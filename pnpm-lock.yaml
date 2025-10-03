@@ -93,6 +93,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@job-tracker/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@job-tracker/parsers':
+        specifier: workspace:*
+        version: link:../../packages/parsers
       '@job-tracker/shared':
         specifier: workspace:*
         version: link:../../packages/shared
