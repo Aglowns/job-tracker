@@ -28,27 +28,32 @@ export async function POST() {
         "id" TEXT NOT NULL PRIMARY KEY,
         "title" TEXT NOT NULL,
         "company" TEXT NOT NULL,
+        "location" TEXT,
+        "job_url" TEXT,
+        "job_id" TEXT,
         "source" TEXT NOT NULL,
-        "applied_at" TIMESTAMP(3) NOT NULL,
+        "applied_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "status" TEXT NOT NULL DEFAULT 'Applied',
+        "needs_review" BOOLEAN NOT NULL DEFAULT false,
+        "last_email_msg_id" TEXT,
         "dedupe_key" TEXT NOT NULL UNIQUE,
-        "user_id" TEXT NOT NULL,
+        "notes" TEXT,
+        "user_id" TEXT,
         "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE
+        FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL
       )
     `;
     
     // Create followups table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "FollowUp" (
+      CREATE TABLE IF NOT EXISTS "Followup" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "application_id" TEXT NOT NULL,
-        "scheduled_at" TIMESTAMP(3) NOT NULL,
-        "type" TEXT NOT NULL,
-        "status" TEXT NOT NULL DEFAULT 'Pending',
+        "due_at" TIMESTAMP(3) NOT NULL,
+        "kind" TEXT NOT NULL,
+        "sent_at" TIMESTAMP(3),
         "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY ("application_id") REFERENCES "Application"("id") ON DELETE CASCADE
       )
     `;
@@ -57,11 +62,12 @@ export async function POST() {
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "AuditLog" (
         "id" TEXT NOT NULL PRIMARY KEY,
-        "application_id" TEXT,
         "action" TEXT NOT NULL,
-        "details" JSONB,
+        "source" TEXT NOT NULL,
+        "payload_hash" TEXT NOT NULL,
+        "user_id" TEXT,
         "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY ("application_id") REFERENCES "Application"("id") ON DELETE SET NULL
+        FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL
       )
     `;
     
