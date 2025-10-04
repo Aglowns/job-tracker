@@ -4,19 +4,23 @@ import { ApplicationList } from '@/components/ApplicationList';
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://job-tracker-web-tau.vercel.app/api' : '/api');
 
 async function getApplications() {
   try {
+    console.log('Fetching applications from:', `${API_URL}/applications`);
     const res = await fetch(`${API_URL}/applications`, {
       cache: 'no-store',
     });
     
+    console.log('Response status:', res.status);
+    
     if (!res.ok) {
-      throw new Error('Failed to fetch applications');
+      throw new Error(`Failed to fetch applications: ${res.status} ${res.statusText}`);
     }
     
     const data = await res.json();
+    console.log('Fetched applications:', data.applications?.length || 0);
     return data.applications;
   } catch (error) {
     console.error('Error fetching applications:', error);
