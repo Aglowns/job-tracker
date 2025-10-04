@@ -1,16 +1,21 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { execSync } from 'child_process';
 
 // One-time migration endpoint for Vercel Postgres
 export async function POST() {
   try {
     console.log('Starting database migration...');
 
-    // For Vercel deployment, we'll use a simple approach
-    // You can run this once after deployment to set up tables
-
-    // Test connection
+    // Test connection first
     await prisma.$connect();
+    
+    // Push the schema to create tables
+    console.log('Pushing Prisma schema to database...');
+    execSync('npx prisma db push --force-reset', { 
+      stdio: 'inherit',
+      cwd: process.cwd()
+    });
     
     // Create a test user to verify everything works
     const testUser = await prisma.user.upsert({
