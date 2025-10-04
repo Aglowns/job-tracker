@@ -9,12 +9,18 @@ export async function POST() {
     // Test connection first
     await prisma.$connect();
     
-    // Create tables manually using Prisma's programmatic API
-    console.log('Creating database tables...');
+    // Drop and recreate tables to ensure correct schema
+    console.log('Dropping and recreating database tables...');
+    
+    // Drop tables in correct order (due to foreign keys)
+    await prisma.$executeRaw`DROP TABLE IF EXISTS "AuditLog" CASCADE`;
+    await prisma.$executeRaw`DROP TABLE IF EXISTS "Followup" CASCADE`;
+    await prisma.$executeRaw`DROP TABLE IF EXISTS "Application" CASCADE`;
+    await prisma.$executeRaw`DROP TABLE IF EXISTS "User" CASCADE`;
     
     // Create users table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "User" (
+      CREATE TABLE "User" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "email" TEXT NOT NULL UNIQUE,
         "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -24,7 +30,7 @@ export async function POST() {
     
     // Create applications table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "Application" (
+      CREATE TABLE "Application" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "title" TEXT NOT NULL,
         "company" TEXT NOT NULL,
@@ -47,7 +53,7 @@ export async function POST() {
     
     // Create followups table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "Followup" (
+      CREATE TABLE "Followup" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "application_id" TEXT NOT NULL,
         "due_at" TIMESTAMP(3) NOT NULL,
@@ -60,7 +66,7 @@ export async function POST() {
     
     // Create audit_logs table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "AuditLog" (
+      CREATE TABLE "AuditLog" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "action" TEXT NOT NULL,
         "source" TEXT NOT NULL,
