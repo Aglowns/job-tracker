@@ -18,6 +18,16 @@ export async function POST() {
     await prisma.$executeRaw`DROP TABLE IF EXISTS "Application" CASCADE`;
     await prisma.$executeRaw`DROP TABLE IF EXISTS "User" CASCADE`;
     
+    // Drop enum types
+    await prisma.$executeRaw`DROP TYPE IF EXISTS "ApplicationSource" CASCADE`;
+    await prisma.$executeRaw`DROP TYPE IF EXISTS "ApplicationStatus" CASCADE`;
+    await prisma.$executeRaw`DROP TYPE IF EXISTS "FollowupKind" CASCADE`;
+    
+    // Create enum types
+    await prisma.$executeRaw`CREATE TYPE "ApplicationSource" AS ENUM ('Email', 'Share', 'Bookmarklet')`;
+    await prisma.$executeRaw`CREATE TYPE "ApplicationStatus" AS ENUM ('Applied', 'PhoneScreen', 'Interview', 'Offer', 'Rejected', 'Ghosted')`;
+    await prisma.$executeRaw`CREATE TYPE "FollowupKind" AS ENUM ('+7d', '+14d')`;
+    
     // Create users table
     await prisma.$executeRaw`
       CREATE TABLE "User" (
