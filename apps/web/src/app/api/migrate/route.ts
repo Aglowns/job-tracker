@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { execSync } from 'child_process';
 
 // One-time migration endpoint for Vercel Postgres
 export async function POST() {
@@ -10,12 +9,61 @@ export async function POST() {
     // Test connection first
     await prisma.$connect();
     
-    // Push the schema to create tables
-    console.log('Pushing Prisma schema to database...');
-    execSync('npx prisma db push --force-reset', { 
-      stdio: 'inherit',
-      cwd: process.cwd()
-    });
+    // Create tables manually using Prisma's programmatic API
+    console.log('Creating database tables...');
+    
+    // Create users table
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS "User" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "email" TEXT NOT NULL UNIQUE,
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    
+    // Create applications table
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS "Application" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "title" TEXT NOT NULL,
+        "company" TEXT NOT NULL,
+        "source" TEXT NOT NULL,
+        "applied_at" TIMESTAMP(3) NOT NULL,
+        "status" TEXT NOT NULL DEFAULT 'Applied',
+        "dedupe_key" TEXT NOT NULL UNIQUE,
+        "user_id" TEXT NOT NULL,
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE
+      )
+    `;
+    
+    // Create followups table
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS "FollowUp" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "application_id" TEXT NOT NULL,
+        "scheduled_at" TIMESTAMP(3) NOT NULL,
+        "type" TEXT NOT NULL,
+        "status" TEXT NOT NULL DEFAULT 'Pending',
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("application_id") REFERENCES "Application"("id") ON DELETE CASCADE
+      )
+    `;
+    
+    // Create audit_logs table
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS "AuditLog" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "application_id" TEXT,
+        "action" TEXT NOT NULL,
+        "details" JSONB,
+        "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("application_id") REFERENCES "Application"("id") ON DELETE SET NULL
+      )
+    `;
     
     // Create a test user to verify everything works
     const testUser = await prisma.user.upsert({
